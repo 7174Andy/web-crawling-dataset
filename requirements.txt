@@ -1,0 +1,5 @@
+selenium
+selenium.webdriver.common.keys
+requests
+keyboard
+pillow
