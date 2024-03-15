@@ -5,6 +5,8 @@ import io
 from PIL import Image
 import time
 import keyboard
+import os
+import shutil
 
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
@@ -110,6 +112,19 @@ def handling_accept_cookies(wd, url):
         element.click()
         time.sleep(3)
         keyboard.press_and_release('esc')
+        
+
+def clear():
+    folder = "./imgs/"
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def main():
     url = "https://www2.hm.com/en_us/men/new-arrivals/view-all.html"
@@ -122,6 +137,7 @@ def main():
     get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
 
     driver.quit()
+    clear()
 
 if __name__ == "__main__":
     main()
