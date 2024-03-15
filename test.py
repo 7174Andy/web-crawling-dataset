@@ -27,7 +27,6 @@ def get_products_links(wd, delay, max_products, url ):
     wd.get(url)
     handling_accept_cookies(wd, url)
     
-    
     links = []
     
     while len(links) < max_products:
@@ -37,6 +36,10 @@ def get_products_links(wd, delay, max_products, url ):
             links.append(element.find_elements(By.TAG_NAME, "a")[0].get_attribute("href"))
             if len(links) >= max_products:
                 break
+            if len(links) % 36 == 0:
+                wd.execute_script("window.scrollTo(0, document.body.scrollHeight - 100);")
+                time.sleep(2)
+                wd.find_element(By.CLASS_NAME, "js-load-more").click()
     return links
 
 
@@ -63,6 +66,15 @@ def get_product_names(wd, links):
 
 # TODO: Find a way to download a specific image (just the images with the garment and the specific poses)
 def get_images_from_url(wd, links, delay, download_path, products):
+    """Download the images from the given links
+
+    Args:
+        wd (webdriver): The webdriver to be used
+        links (list): list of links to download the images
+        delay (int): delay between each download
+        download_path (str): directory to save the images
+        products (list): name of the products
+    """
     for link, product in zip(links, products):
         time.sleep(delay)
         wd.get(link)
@@ -86,6 +98,12 @@ def get_images_from_url(wd, links, delay, download_path, products):
                 i += 1
 
 def handling_accept_cookies(wd, url):
+    """Automatically clicks on the accept cookies button
+
+    Args:
+        wd (webdriver): The webdriver to be used
+        url (str): The url of the website
+    """
     wd.get(url)
     element = wd.find_element_by_id("onetrust-accept-btn-handler")
     if element:
@@ -95,11 +113,11 @@ def handling_accept_cookies(wd, url):
 
 def main():
     url = "https://www2.hm.com/en_us/men/new-arrivals/view-all.html"
-    links = get_products_links(wd=driver, delay=5, max_products=20, url=url)
+    links = get_products_links(wd=driver, delay=5, max_products=50, url=url)
     products = get_product_names(wd=driver, links=links)
     print(f"Done! Got {len(products)} products:")
     time.sleep(5)
-    print(products)
+    print(f"{len(products)} products found")
     print(links)
     get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
 
