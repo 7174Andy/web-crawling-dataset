@@ -11,7 +11,7 @@ import shutil
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 
-# driver = webdriver.Chrome(executable_path="C:\ChromeDesktop\chromedriver-win64\chromedriver.exe", options=options)
+driver = webdriver.Chrome(executable_path="C:\ChromeDesktop\chromedriver-win64\chromedriver.exe", options=options)
 
 def get_products_links(wd, delay, max_products, url ):
     """Get the links for the products from the website
@@ -80,12 +80,17 @@ def get_images_from_url(wd, links, delay, download_path, products):
     # setup necessary directories to store different poses
     setup_path(directory=download_path)
     
+    time.sleep(3)
+    
     for link, product in zip(links, products):
         # make new directories for different poses
         
         time.sleep(delay)
         
         wd.get(link)
+        
+        # Specific pieces in the source URL of the image
+        just_garment = "5BDESCRIPTIVESTILLLIFE"
         
         i = 1
         elements = wd.find_elements(By.CLASS_NAME, "pdp-image")
@@ -94,17 +99,24 @@ def get_images_from_url(wd, links, delay, download_path, products):
             for image in children:
                 url = image.get_attribute("src")
                 try:
+                    
                     image_content = requests.get(url).content
                     image_file = io.BytesIO(image_content)
                     image = Image.open(image_file).convert("RGB")
-                    file_path = f"{download_path}{product} {i}.jpeg"
+                    if (just_garment in url):
+                        path = os.path.join(download_path, "garments")
+                        file_path = f"{path}/{product} garment.jpeg"
+                        
+                    else:
+                        path = os.path.join(download_path, "random")
+                        file_path = f"{path}/{product} {i}.jpeg"
                     with open(file_path, "wb") as f:
                         image.save(f, "jpeg")
-                    print("Success")
                     
                 except Exception as e:
                     print("FAILED - ", e)
                 i += 1
+                print(f"Images for {product} successfully Downloaded {i}/{len(products)}")
 
 def handling_accept_cookies(wd, url):
     """Automatically clicks on the accept cookies button
@@ -122,16 +134,16 @@ def handling_accept_cookies(wd, url):
 
 def setup_path(directory):
     try:
-        os.mkdir(f"{directory}/garment")
+        os.mkdir(f"{directory}/garments")
         os.mkdir(f"{directory}/front")
         os.mkdir(f"{directory}/back")
         os.mkdir(f"{directory}/random")
-    except FileExistsError:
-        pass
+    except FileExistsError as e:
+        print("FAILED - ", e)
 
 # TODO: get the tabs necessary for this dataset from H&M shopping mall website
 def get_subgroups(wd, homepage):
-    pass
+    pass    
 
 def clear():
     folder = "./imgs/"
@@ -149,19 +161,17 @@ def clear():
         os.rmdir(path)
 
 def main():
-    # url = "https://www2.hm.com/en_us/men/new-arrivals/view-all.html"
-    # links = get_products_links(wd=driver, delay=5, max_products=50, url=url)
-    # products = get_product_names(wd=driver, links=links)
-    # print(f"Done! Got {len(products)} products:")
-    # time.sleep(5)
-    # print(f"{len(products)} products found")
-    # print(links)
-    # get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
+    url = "https://www2.hm.com/en_us/men/new-arrivals/clothes.html"
+    links = get_products_links(wd=driver, delay=5, max_products=10, url=url)
+    products = get_product_names(wd=driver, links=links)
+    time.sleep(5)
+    print(f"{len(products)} products found")
+    print(links)
+        
+    get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
 
-    # driver.quit()
-    setup_path("imgs")
-    clear()
-    print("Cleared")
+    driver.quit()
+    
 
 if __name__ == "__main__":
     main()
