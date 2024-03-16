@@ -11,7 +11,7 @@ import shutil
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 
-driver = webdriver.Chrome(executable_path="C:\ChromeDesktop\chromedriver-win64\chromedriver.exe", options=options)
+# driver = webdriver.Chrome(executable_path="C:\ChromeDesktop\chromedriver-win64\chromedriver.exe", options=options)
 
 def get_products_links(wd, delay, max_products, url ):
     """Get the links for the products from the website
@@ -121,10 +121,13 @@ def handling_accept_cookies(wd, url):
         keyboard.press_and_release('esc')
 
 def setup_path(directory):
-    os.mkdir(f"{directory}/garment")
-    os.mkdir(f"{directory}/front")
-    os.mkdir(f"{directory}/back")
-    os.mkdir(f"{directory}/random")
+    try:
+        os.mkdir(f"{directory}/garment")
+        os.mkdir(f"{directory}/front")
+        os.mkdir(f"{directory}/back")
+        os.mkdir(f"{directory}/random")
+    except FileExistsError:
+        pass
 
 # TODO: get the tabs necessary for this dataset from H&M shopping mall website
 def get_subgroups(wd, homepage):
@@ -132,15 +135,18 @@ def get_subgroups(wd, homepage):
 
 def clear():
     folder = "./imgs/"
-    for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    for dir in os.listdir(folder):
+        path = os.path.join(folder, dir)
+        for filename in os.listdir(path):
+            file_path = os.path.join(path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        os.rmdir(path)
 
 def main():
     # url = "https://www2.hm.com/en_us/men/new-arrivals/view-all.html"
@@ -154,6 +160,8 @@ def main():
 
     # driver.quit()
     setup_path("imgs")
+    clear()
+    print("Cleared")
 
 if __name__ == "__main__":
     main()
