@@ -66,7 +66,6 @@ def get_product_names(wd, links):
     return products_names
     
 
-# TODO: Find a way to download a specific image (just the images with the garment and the specific poses)
 def get_images_from_url(wd, links, delay, download_path, products):
     """Download the images from the given links
 
@@ -77,9 +76,17 @@ def get_images_from_url(wd, links, delay, download_path, products):
         download_path (str): directory to save the images
         products (list): name of the products
     """
+    
+    # setup necessary directories to store different poses
+    setup_path(directory=download_path)
+    
     for link, product in zip(links, products):
+        # make new directories for different poses
+        
         time.sleep(delay)
+        
         wd.get(link)
+        
         i = 1
         elements = wd.find_elements(By.CLASS_NAME, "pdp-image")
         for element in elements:
@@ -112,7 +119,16 @@ def handling_accept_cookies(wd, url):
         element.click()
         time.sleep(3)
         keyboard.press_and_release('esc')
-        
+
+def setup_path(directory):
+    os.mkdir(f"{directory}/garment")
+    os.mkdir(f"{directory}/front")
+    os.mkdir(f"{directory}/back")
+    os.mkdir(f"{directory}/random")
+
+# TODO: get the tabs necessary for this dataset from H&M shopping mall website
+def get_subgroups(wd, homepage):
+    pass
 
 def clear():
     folder = "./imgs/"
@@ -127,16 +143,17 @@ def clear():
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 def main():
-    url = "https://www2.hm.com/en_us/men/new-arrivals/view-all.html"
-    links = get_products_links(wd=driver, delay=5, max_products=50, url=url)
-    products = get_product_names(wd=driver, links=links)
-    print(f"Done! Got {len(products)} products:")
-    time.sleep(5)
-    print(f"{len(products)} products found")
-    print(links)
-    get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
+    # url = "https://www2.hm.com/en_us/men/new-arrivals/view-all.html"
+    # links = get_products_links(wd=driver, delay=5, max_products=50, url=url)
+    # products = get_product_names(wd=driver, links=links)
+    # print(f"Done! Got {len(products)} products:")
+    # time.sleep(5)
+    # print(f"{len(products)} products found")
+    # print(links)
+    # get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
 
-    driver.quit()
+    # driver.quit()
+    setup_path("imgs")
 
 if __name__ == "__main__":
     main()
