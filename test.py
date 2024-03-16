@@ -137,7 +137,6 @@ def main():
     get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
 
     driver.quit()
-    clear()
 
 if __name__ == "__main__":
     main()
