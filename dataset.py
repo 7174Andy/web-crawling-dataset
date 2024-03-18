@@ -82,6 +82,8 @@ def get_images_from_url(wd, links, delay, download_path, products):
     
     time.sleep(3)
     
+    product_count = 0
+    
     for link, product in zip(links, products):
         # make new directories for different poses
         
@@ -90,8 +92,12 @@ def get_images_from_url(wd, links, delay, download_path, products):
         wd.get(link)
         
         # Specific pieces in the source URL of the image
-        just_garment = "5BDESCRIPTIVESTILLLIFE"
+        just_garment_url = "5BDESCRIPTIVESTILLLIFE"
         
+        fronot_pose_url = "call=url[file:/product/main]"
+        
+        product_count += 1
+        print(f"Downloading images for {product} {product_count}/{len(products)}")
         i = 1
         elements = wd.find_elements(By.CLASS_NAME, "pdp-image")
         for element in elements:
@@ -99,14 +105,15 @@ def get_images_from_url(wd, links, delay, download_path, products):
             for image in children:
                 url = image.get_attribute("src")
                 try:
-                    
                     image_content = requests.get(url).content
                     image_file = io.BytesIO(image_content)
                     image = Image.open(image_file).convert("RGB")
-                    if (just_garment in url):
+                    if (just_garment_url in url):
                         path = os.path.join(download_path, "garments")
                         file_path = f"{path}/{product} garment.jpeg"
-                        
+                    elif (fronot_pose_url in url):
+                        path = os.path.join(download_path, "front")
+                        file_path = f"{path}/{product} front.jpeg"
                     else:
                         path = os.path.join(download_path, "random")
                         file_path = f"{path}/{product} {i}.jpeg"
@@ -115,8 +122,9 @@ def get_images_from_url(wd, links, delay, download_path, products):
                     
                 except Exception as e:
                     print("FAILED - ", e)
+                print(f"Images for {product} successfully Downloaded {i}/{len(elements)}")
                 i += 1
-                print(f"Images for {product} successfully Downloaded {i}/{len(products)}")
+        print("-----------------------------------------------")
 
 def handling_accept_cookies(wd, url):
     """Automatically clicks on the accept cookies button
@@ -138,6 +146,8 @@ def setup_path(directory):
         os.mkdir(f"{directory}/front")
         os.mkdir(f"{directory}/back")
         os.mkdir(f"{directory}/random")
+        print("Directories created successfully")
+        print("-----------------------------------------------")
     except FileExistsError as e:
         print("FAILED - ", e)
 
@@ -161,12 +171,17 @@ def clear():
         os.rmdir(path)
 
 def main():
+    clear()
+    time.sleep(2)
     url = "https://www2.hm.com/en_us/men/new-arrivals/clothes.html"
     links = get_products_links(wd=driver, delay=5, max_products=10, url=url)
     products = get_product_names(wd=driver, links=links)
     time.sleep(5)
+    print("-----------------------------------------------")
     print(f"{len(products)} products found")
+    print("-----------------------------------------------")
     print(links)
+    print("-----------------------------------------------")
         
     get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
 
