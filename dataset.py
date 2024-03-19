@@ -10,10 +10,11 @@ import shutil
 
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
+options.add_argument('--ignore-certificate-errors-spki-list')
 
 driver = webdriver.Chrome(executable_path="C:\ChromeDesktop\chromedriver-win64\chromedriver.exe", options=options)
 
-def get_products_links(wd, delay, max_products, url ):
+def get_products_links(wd, delay, max_products, url):
     """Get the links for the products from the website
 
     Args:
@@ -44,7 +45,6 @@ def get_products_links(wd, delay, max_products, url ):
                 wd.find_element(By.CLASS_NAME, "js-load-more").click()
     return links
 
-
 def get_product_names(wd, links):
     """Gets the name of each product in the given links
 
@@ -60,11 +60,14 @@ def get_product_names(wd, links):
         time.sleep(2)
         wd.get(link)
         names = wd.find_elements(By.TAG_NAME, "hm-product-name")
+        colors = wd.find_elements(By.CLASS_NAME, "product-input-label")
+        
         name = names[0].get_attribute("product-name")
-        products_names.append(name)
+        color = colors[0].text
+        products_names.append(f"{name} {color}")
     
     return products_names
-    
+
 
 def get_images_from_url(wd, links, delay, download_path, products):
     """Download the images from the given links
@@ -85,8 +88,6 @@ def get_images_from_url(wd, links, delay, download_path, products):
     product_count = 0
     
     for link, product in zip(links, products):
-        # make new directories for different poses
-        
         time.sleep(delay)
         
         wd.get(link)
@@ -97,7 +98,7 @@ def get_images_from_url(wd, links, delay, download_path, products):
         fronot_pose_url = "call=url[file:/product/main]"
         
         product_count += 1
-        print(f"Downloading images for {product} {product_count}/{len(products)}")
+        print(f"Downloading images for {product} {product_count}/{len(products)} in {link}...")
         i = 1
         elements = wd.find_elements(By.CLASS_NAME, "pdp-image")
         for element in elements:
@@ -186,6 +187,8 @@ def main():
     get_images_from_url(wd=driver, links=links, delay=5, download_path="./imgs/", products=products)
 
     driver.quit()
+    
+    print("`Comaplete!")
     
 
 if __name__ == "__main__":
