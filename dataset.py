@@ -175,7 +175,7 @@ def main():
     clear()
     time.sleep(2)
     url = "https://www2.hm.com/en_us/men/new-arrivals/clothes.html"
-    links = get_products_links(wd=driver, delay=5, max_products=10, url=url)
+    links = get_products_links(wd=driver, delay=5, max_products=3, url=url)
     products = get_product_names(wd=driver, links=links)
     time.sleep(5)
     print("-----------------------------------------------")
