@@ -171,7 +171,7 @@ class WebScrape:
 
 def main():
     url = "https://www2.hm.com/en_us/men/new-arrivals/clothes.html"
-    webscrapper = WebScrape(wd=driver, url=url, delay=3, max_products=3)
+    webscrapper = WebScrape(wd=driver, url=url, delay=3, max_products=50)
     WebScrape.clear()
     webscrapper.get_products_links()
     products = webscrapper.get_product_names()
