@@ -8,12 +8,12 @@ import time
 import keyboard
 import os
 import shutil
+import undetected_chromedriver as uc
 
 # Constants for the web ddriver for scraping
-service = Service("C:\ChromeDesktop\chromedriver-win64\chromedriver.exe")
-options = webdriver.ChromeOptions()
+options = uc.ChromeOptions()
 options.add_argument("--start-maximized")
-driver = webdriver.Chrome(service=service, options=options)
+driver = uc.Chrome(options=options)
 
 class WebScrape:
     def __init__(self, wd, url, delay=3, max_products=50, ):
@@ -171,7 +171,7 @@ class WebScrape:
 
 def main():
     url = "https://www2.hm.com/en_us/men/new-arrivals/clothes.html"
-    webscrapper = WebScrape(wd=driver, url=url, delay=3, max_products=50)
+    webscrapper = WebScrape(wd=driver, url=url, delay=3, max_products=5)
     WebScrape.clear()
     webscrapper.get_products_links()
     products = webscrapper.get_product_names()
